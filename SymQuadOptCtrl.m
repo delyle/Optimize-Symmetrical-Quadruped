@@ -38,11 +38,8 @@ if isfield(auxdata,'LimbWork')
 else
     auxdata.LimbWork = true;
 end
-auxdata.LimbWork = double(auxdata.LimbWork);%converts the logical to a double.
+auxdata.LimbWork = double(auxdata.LimbWork); %converts the logical to a double.
 
-if ~isfield(auxdata,'FreeTime')
-   auxdata.FreeTime = false; 
-end
 %-------------------------------------------------------------------%
 %------------------------- Variable Bounds -------------------------%
 %-------------------------------------------------------------------%
@@ -149,6 +146,7 @@ elseif isstruct(guess)
         auxdata.setMesh = false;
     end
     if isfield(auxdata,'perturb') && auxdata.perturb
+       % This will perturb the guess by adding Gaussian noise
        f = auxdata.perturb;
        guess.phase.state = addnoise(guess.phase.state,f);
        guess.parameter = addnoise(guess.parameter,f);
@@ -207,7 +205,6 @@ end
 function phaseout = Continuous(input)
 
 % extract data
-%t = input.phase(1).time;
 X = input.phase(1).state;
 U = input.phase(1).control;
 P = input.phase(1).parameter;
@@ -225,11 +222,9 @@ v = X(:,5);
 w = X(:,6);
 
 F = X(:,7:11);
-%FLH = F(:,1);
+
 FLFt = F(:,2);
 FLFl = F(:,3);
-%FRH = F(:,4);
-%FRF = F(:,5);
 
 dF = U(:,1:5);
 p = U(:,6:10);

@@ -237,7 +237,6 @@ switch optimizer
         [objective,~,~] = CostComponents(output);
     case 'forcerate'
         [~,objective,~] = CostComponents(output);
-        objective = objective^(1/r);
     case 'work+forcerate'
         [work,forcerate,~] = CostComponents(output);
         objective = work+(forcerate);
