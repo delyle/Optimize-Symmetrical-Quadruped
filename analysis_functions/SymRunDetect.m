@@ -6,7 +6,7 @@ function isrun = SymRunDetect(output,mincontactforce)
 % (in this case we only need to consider left front acting through hind 
 % contact). 
 % 
-% Returns -1 if a run is detected, and 1 otherwise.
+% Returns 1 if a run is detected, and -1 otherwise.
 
 X = output.result.interpsolution.phase.state;
 
@@ -23,7 +23,7 @@ Hds = FLH > mincontactforce & FRH > mincontactforce; % simultaneous contact in h
 Fds = FLFt> mincontactforce & FRF > mincontactforce; % simultaneous contact in fore
 
 
-isrun = 1; % it is not a run
+isrun = 1; % it is a run
 if any(Hds) || any(Fds)
-    isrun = -1; % it is a run
+    isrun = -1; % it is not a run
 end
