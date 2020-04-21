@@ -5,7 +5,9 @@ Dependencies:
 * [GPOPS-II](http://www.gpops2.com/)
 * [SNOPT](https://ampl.com/products/solvers/solvers-we-sell/snopt/)
 
-## Install
+This code runs in MATLAB and has been tested on MATLAB 2019a.
+
+## Running the code
 
 1. In MATLAB, `cd` to the OptSymQuad directory
 2. `run add_necessary_paths`. This will add the relevant functions to your MATLAB path.
