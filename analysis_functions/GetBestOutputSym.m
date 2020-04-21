@@ -1,10 +1,11 @@
 function out = GetBestOutputSym(ParentDir,varargin)
 % This function looks through all directories named "rand_guess*" one level
 % below Parentdir and pulls out all GPOPSII output files. It then locates
-% (by default) the output file that satisfies three conditions:
+% (by default) the output file that satisfies four conditions:
 %   1. Mesh error is < mesh tolerance supplied in GPOPS setup
-%   2. Complementarity constraints are satisfied within tolerance
-%   3. The objective is minimal among all GPOPSII outputs in the list
+%   2. SNOPT output flag is < 10, signifying a successful run
+%   3. Complementarity constraints are satisfied within tolerance
+%   4. The objective is minimal among all GPOPSII outputs in the list
 % The function then saves a copy of the output, along with information
 % about the parent directory and location of the file, in ParentDir
 %
@@ -86,7 +87,7 @@ addParameter(p,'SaveResults',true,@islogical)
 addParameter(p,'Verbose',true,@islogical)
 addParameter(p,'Optimizer','work+forcerate',@isstr)
 addParameter(p,'MATSaveName','BestResult',@isstr)
-addParameter(p,'ConvergeCrit','GPOPS',@isstr) %'SNOPT','GPOPS','SNOPTGPOPS'
+addParameter(p,'ConvergeCrit','SNOPTGPOPS',@isstr) %'SNOPT','GPOPS','SNOPTGPOPS'
 addParameter(p,'GuessRange',Inf,@isnumeric)
 validStr = {'none','pitch','ensurealllimbs'};
 addParameter(p,'BipedDetect','pitch',@(x) any(strcmpi(x,validStr)))
