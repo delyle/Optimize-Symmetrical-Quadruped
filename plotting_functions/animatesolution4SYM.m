@@ -1,32 +1,63 @@
-function animatesolution4SYM(output,savename,showtext,alpha,threshold,bodytype,txt)
-% Makes a 4-second animation of the result
+function animatesolution4SYM(GPOPSoutput,savename,showtext,alpha,threshold,bodytype)
+% Makes a 4-second animation of the GPOPS solution found by SymQuadOptCtrl
+%
 % Requires patchline:
 % http://www.mathworks.com/matlabcentral/fileexchange/36953-patchline/content/patchline.m
+%
+% savename: file name for the video. Will be appended with '_animate.mp4'
+%
+% showtext: display information about the solution.
+%   logical vector (length 3): each element corresponds to a different
+%       aspect of the information to be displayed outside the plot area
+%       ([1 1 1] default) display all elements
+%       [1 ~ ~]: Display speed, stride length and forelimb length only
+%       [~ 1 ~]: Display nlpinfo, penalty coefficient vector, and
+%            cost components (work, force-rate, slack variable penalties)
+%       [~ ~ 1]: Display force display threshold
+%   'OUTSIDE': Display Speed and MOI text in the outside-middle of the 
+%       plotting area
+%
+% alpha: if true, limb opacity is set by limb force. If false, (default)
+%   limbs are shown when limb force exceeds a threshold
+%
+% threshold: minimum force (mg) at which limbs are shown (if alpha=false)
+%
+% bodytype: how to display torso (char, case insensitive)
+%   'EvenPM', 'Evenpointmass':
+%       (default) torso is two point masses at a radius of gyration from
+%       the center of mass
+%   'PMLIMBS','POINTMASSLIMBS','DISTPM','DISTRIBUTEDPOINTMASS':
+%       Torso is displayed as linked point masses at the hips and
+%       shoulders, with their relative sizes matching the relative position
+%       of the center of mass along the torso
+%   'PM','POINTMASS':
+%       Torso is displayed as linked point masses at the hips and
+%       shoulders, both of the same size.
+%
 
 filename = [savename,'_animate'];
 
 narginchk(2,7)
-if nargin < 7
-    txt = NaN;
-    if nargin < 6
-        bodytype = 'EvenPM';
-        if nargin < 5
-            threshold = 0.05;
-            if nargin < 4
-                alpha = false;
-                if nargin < 3
-                    showtext = logical([1 1 1]);
-                end
+
+if nargin < 6
+    bodytype = 'EvenPM';
+    if nargin < 5
+        threshold = 0.05;
+        if nargin < 4
+            alpha = false;
+            if nargin < 3
+                showtext = logical([1 1 1]);
             end
         end
     end
 end
+
 tq = linspace(0,1,120)';
 
-auxdata = output.result.setup.auxdata;
+auxdata = GPOPSoutput.result.setup.auxdata;
 D = auxdata.D;
-[t2,x2,y2,theta2,F2] = SymOutStates2FullCycle(output);
-P = output.result.interpsolution.parameter;
+[t2,x2,y2,theta2,F2] = SymOutStates2FullCycle(GPOPSoutput);
+P = GPOPSoutput.result.interpsolution.parameter;
 
 
 F3 = interp1(t2,F2,tq,'pchip');
@@ -51,10 +82,11 @@ mf = auxdata.mf;
 m = [mf, 1-mf];
 Fmax = max(max(F2));
 lmaxF = auxdata.lmax(1);
+lmaxH = auxdata.lmax(2);
 lmax = max(auxdata.lmax);
 F = abs(F3./Fmax);
-Fr = auxdata.Fr;
-Uh = D*sqrt(Fr/lmaxF);
+tau = auxdata.tau;
+Uh = D*sqrt(tau/lmaxH);
 Ihat = auxdata.I*4;
 if isfield(auxdata,'c')
     c = auxdata.c;
@@ -77,11 +109,11 @@ hold on;
 
 switch upper(bodytype)
     case {'EVENPM','EVENPOINTMASS'}
-    rgyr = sqrt(I)*[cos(theta3), sin(theta3)]/2; % radius of gyration, relative to half body length.
-    xgyr = [-rgyr(:,1)+x3-x0,+rgyr(:,1)+x3-x0];
-    ygyr = [-rgyr(:,2)+y3,rgyr(:,2)+y3];
-    mrksz = [10 10]; % marker sizes are equal
-    mrkst = 's';
+        rgyr = sqrt(I)*[cos(theta3), sin(theta3)]/2; % radius of gyration, relative to half body length.
+        xgyr = [-rgyr(:,1)+x3-x0,+rgyr(:,1)+x3-x0];
+        ygyr = [-rgyr(:,2)+y3,rgyr(:,2)+y3];
+        mrksz = [10 10]; % marker sizes are equal
+        mrkst = 's';
     case {'PMLIMBS','POINTMASSLIMBS','DISTPM','DISTRIBUTEDPOINTMASS'}
         xgyr = xs;
         ygyr = ys;
@@ -97,9 +129,9 @@ end
 yl = [0,1.5*lmax];
 xl = [-2.5 2.5];%[-1.5,1.5];
 
-Work = output.result.solution.phase.integral(1);
-Fdot = output.result.solution.phase.integral(2);
-slackPen = output.result.solution.phase.integral(3);
+Work = GPOPSoutput.result.solution.phase.integral(1);
+Fdot = GPOPSoutput.result.solution.phase.integral(2);
+slackPen = GPOPSoutput.result.solution.phase.integral(3);
 
 
 
@@ -108,51 +140,31 @@ writerObj.FrameRate = 30;
 open(writerObj);
 
 [txt1,txt2,txt3] = deal('');
-if ischar(showtext)
-    switch upper(showtext)
-        case 'OUTSIDE'
-            if isnan(txt)
-                txt1 = ['$\hat{U}_H = ', num2str(Uh,'%.2f'),',\quad','\hat{I} = ',num2str(Ihat,2),'$'];
-            else
-                txt1 = txt;
-            end
-            xy_txt = [0.5,1.05;
-                      0.5,0.9;
-                      0.9,0.9];
-            alignment_txt = {'center','bottom'};
-            fontsize_txt = 14;
-        case 'OUTSIDE+INSIDE'
-            if iscell(txt)
-                txt1 = txt{1};
-                txt2 = txt{2};
-            elseif isnan(txt)
-                txt1 = ['$U''_H = ', num2str(Uh,'%.2f'),',\quad','\hat{I} = ',num2str(Ihat,2),'$'];
-                txt2 = ['$D'' = $',num2str(D),char(10)...
-                        '$l''_{Fmax} = $', num2str(lmaxF),char(10)];
-            end
-            xy_txt = [0.5,1.05;
-                      0.5,0.9;
-                      0.9,0.9];
-            alignment_txt = {'center','bottom'};
-            fontsize_txt = 14;
-    end
+if strcmpi(showtext,'outside')
+    
+    txt1 = ['$U''_H = ', num2str(Uh,'%.2f'),',\quad','\hat{I} = ',num2str(Ihat,2),'$'];
+    xy_txt = [0.5,1.05;
+        0.5,0.9;
+        0.9,0.9];
+    alignment_txt = {'center','bottom'};
+    fontsize_txt = 14;
 else
     showtext = logical(showtext);
     xy_txt = [0.1,1.05;
-              0.25,1.05;
-              0.9,1.05];
+        0.25,1.05;
+        0.9,1.05];
     alignment_txt = {'left','bottom'};
     fontsize_txt = 10;
     if showtext(1)
         % This info to be plotted at top-left
         txt1 = ['$U''_H$ = ', num2str(Uh,2),char(10),...
             '$D'' = $',num2str(D),char(10)...
-            '$l''_{Fmax} = $', num2str(lmaxF)];
+            '$l''_{max} = $', num2str(lmaxF),', ', num2str(lmaxH)];
     end
     if showtext(2)
         % This info to be plotted to the right of the above
         c_text = ['[',regexprep(num2str(c), ' *', ' '),']'];
-        txt2 = ['nlpinfo: ',num2str(output.result.nlpinfo),char(10),...
+        txt2 = ['nlpinfo: ',num2str(GPOPSoutput.result.nlpinfo),char(10),...
             'c = ', c_text,...
             char(10),' CoT: Work: ', num2str(Work/D,4),' $\dot{F}^2$: ', num2str(Fdot/D,4), ' slackPen: ' num2str(slackPen,4)];
     end
@@ -163,7 +175,7 @@ end
 lw = 2;
 for i = 1:length(tq)
     cla;
-
+    
     % Parameters
     text(xy_txt(1,1),xy_txt(1,2),txt1,'interpreter','latex','units','normalized','horizontalalignment',alignment_txt{1},'verticalalignment',alignment_txt{2},'fontsize',fontsize_txt);
     text(xy_txt(2,1),xy_txt(2,2),txt2,'interpreter','latex','units','normalized','horizontalalignment',alignment_txt{1},'verticalalignment',alignment_txt{2},'fontsize',fontsize_txt);
@@ -174,8 +186,7 @@ for i = 1:length(tq)
     if alpha
         patchline([LF1(i),xs(i,1)],[0,ys(i,1)],'linestyle','--','edgecolor','b','edgealpha',F(i,2),'linewidth',lw);
         patchline([LF2(i),xs(i,1)],[0,ys(i,1)],'linestyle','--','edgecolor','b','edgealpha',F(i,3),'linewidth',lw);
-        patchline([LH1(i),xs(i,2)],[0,ys(i,2)],'linestyle','--','edgecolor','b','edgealpha',F(i,6),'linewidth',lw);
-        patchline([LH2(i),xs(i,2)],[0,ys(i,2)],'linestyle','--','edgecolor','b','edgealpha',F(i,7),'linewidth',lw);
+        patchline([LH(i),xs(i,2)],[0,ys(i,2)],'linestyle','--','edgecolor','b','edgealpha',F(i,1),'linewidth',lw);
     else
         if F3(i,1) > threshold
             patchline([LH(i),xs(i,2)],[0,ys(i,2)],'linestyle','--','edgecolor','b','linewidth',lw)
@@ -198,11 +209,12 @@ for i = 1:length(tq)
     
     % Right Limbs
     if alpha
-        patchline([RF(i),xs(i,1)],[0,ys(i,1)],'linestyle','-','edgecolor','r','edgealpha',F(i,1),'linewidth',lw);
+        patchline([RF1(i),xs(i,1)],[0,ys(i,1)],'linestyle','-','edgecolor','r','edgealpha',F(i,6),'linewidth',lw);
+        patchline([RF2(i),xs(i,1)],[0,ys(i,1)],'linestyle','-','edgecolor','r','edgealpha',F(i,7),'linewidth',lw);
         patchline([RH1(i),xs(i,2)],[0,ys(i,2)],'linestyle','-','edgecolor','r','edgealpha',F(i,4),'linewidth',lw);
         patchline([RH2(i),xs(i,2)],[0,ys(i,2)],'linestyle','-','edgecolor','r','edgealpha',F(i,5),'linewidth',lw);
     else
-       if F3(i,4) > threshold
+        if F3(i,4) > threshold
             patchline([RH1(i),xs(i,2)],[0,ys(i,2)],'linestyle','-','edgecolor','r','linewidth',lw)
         end
         if F3(i,5) > threshold
@@ -215,6 +227,7 @@ for i = 1:length(tq)
             patchline([RF2(i),xs(i,1)],[0,ys(i,1)],'linestyle','-','edgecolor','r','linewidth',lw)
         end
     end
+    
     % ground markers
     plot(LH(i),0,'bo')
     

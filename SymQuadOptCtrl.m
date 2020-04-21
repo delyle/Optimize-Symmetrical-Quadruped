@@ -1,25 +1,48 @@
 function output = SymQuadOptCtrl(auxdata,guess)
+% This function uses trajectory optimization to find a symmetrical gait
+% that minimizes a work-based objective with force rate and
+% complementarity violation penalties using GPOPS-II and SNOPT.
+%
+%   
+% auxdata is a struct that contains data required for the problem.
+% Necessary fields are:
+%   D -- the stride length per body length (lb)
+%   l -- [forelimb, hindlimb] lengths relative to lb (vector)
+%   I -- Normalized pitch MOI (Murphy number x 0.25, or I/m/lb^2)
+%   tau -- lb/g/T^2, a (inverse) time constant 
+%   mf -- the bias of the center of mass towards the fore-quarters from the
+%         hindquarters (lb)
+%   auxdata can take on other values that are otherwise set by default: see
+%   below
+%
+% If guess is empty, then the function will generate a random guess based 
+% on the ranges of controls, states and parameters. 
+% 
+% Guess can also be a previous output from SymQuadOptCtrl. If
+% auxdata.perturb = true, then the function will perturb the solution with
+% gaussian noise.
 
 %-------------------------------------------------------------------%
 %-------------------- Data Required by Problem ---------------------%
 %-------------------------------------------------------------------%
 
-% specify auxdata if not already done
+% Set default values of auxdata if necessary
 
-D = auxdata.D;
-l = auxdata.lmax;
+D = auxdata.D; % stride length per body length (lb)
+l = auxdata.lmax; % [forelimb, hindlimb] lengths relative to lb
+
 if ~isfield(auxdata,'abounds')
-    auxdata.abounds = pi*[-1 1];
+    auxdata.abounds = pi*[-1 1]; % bounds on body pitch angle
 end
 abounds = auxdata.abounds;
 
 if ~isfield(auxdata,'Fmax')
-    auxdata.Fmax = 10;
+    auxdata.Fmax = 10; % bounds on maximum GRF for any limb (mg)
 end
 Fmax = auxdata.Fmax;
 
 if ~isfield(auxdata,'Fdotmax')
-    auxdata.Fdotmax = 100;
+    auxdata.Fdotmax = 100; % bounds on rate of change of force mg/T
 end
 dFmax = auxdata.Fdotmax;
 
@@ -36,7 +59,7 @@ if isfield(auxdata,'LimbWork')
         error('auxdata.LimbWork must be a logical')
     end
 else
-    auxdata.LimbWork = true;
+    auxdata.LimbWork = true; % calculate limb work for objective. If false, will calculate a limb's contribution to COM work
 end
 auxdata.LimbWork = double(auxdata.LimbWork); %converts the logical to a double.
 
@@ -121,6 +144,7 @@ bounds.phase(i).path.upper = [0, Fmax*max(l)*[1 1 1 1 1], 1 + 4*max(l)*[1 1], [0
 % ----- PHASE 1 ----- %
 
 if isempty(guess)
+    % Make a random guess
     i = 1;
     ntime = 16;
     guess.phase(i).time    = linspace(0,0.5,ntime)';                % column vector, min length = 2
@@ -210,9 +234,10 @@ U = input.phase(1).control;
 P = input.phase(1).parameter;
 aux = input.auxdata;
 D = aux.D;
-Fr = aux.Fr;
-I = aux.I;
+tau = aux.tau; % lb/T^2/g
+I = aux.I; % NOT the murphy number. This is I/m/lb^2
 lmax = aux.lmax;
+mf = aux.mf;
 
 x = X(:,1);
 y = X(:,2);
@@ -233,7 +258,7 @@ slimb = U(:,16:20);
 ssimult = U(:,21);
 
 intFLF = X(:,12);
-mf = input.auxdata.mf;
+
 mh = (1-mf);
 lb_hat =[cos(a), sin(a)];
 ntime = length(x);
@@ -262,10 +287,10 @@ Fvec(:,1:2,:) = [F3,F3].*L(:,1:2,:)./[absL,absL];
 FHtot = sum(Fvec(:,:,[1 4]),3);
 FFtot = sum(Fvec(:,:,[2 3 5]),3);
 
-Atrans = (FHtot + FFtot - [zs,os,zs])/Fr;
+Atrans = (FHtot + FFtot - [zs,os,zs])/tau;
 TorqueF = cross([rF,zs],FFtot);
 TorqueH = cross([rH,zs],FHtot);
-Arot = (TorqueF + TorqueH)/(I*Fr);
+Arot = (TorqueF + TorqueH)/(I*tau);
 
 
 xdot = [u,v,w,Atrans+Arot,dF,FLFl]; % provide derivative

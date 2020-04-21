@@ -1,11 +1,11 @@
-function All_results_plotSYM(output)
+function All_results_plotSYM(GPOPSoutput)
+% Plot results from a single solution of SymQuadOptCtrl
 
+t = GPOPSoutput.result.solution.phase.time;
+X = GPOPSoutput.result.solution.phase.state;
+P = GPOPSoutput.result.solution.parameter;
 
-t = output.result.solution.phase.time;
-X = output.result.solution.phase.state;
-P = output.result.solution.parameter;
-
-auxdata = output.result.setup.auxdata;
+auxdata = GPOPSoutput.result.setup.auxdata;
 F = X(:,7:11);
 
 Uf = auxdata.Uf;

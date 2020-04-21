@@ -1,11 +1,18 @@
-function [t2,x2,y2,theta2,F2,u2,v2,w2] = SymOutStates2FullCycle(output,soltype)
+function [t2,x2,y2,theta2,F2,u2,v2,w2] = SymOutStates2FullCycle(GPOPSoutput,soltype)
+% This function takes GPOPSoutput, produced by SymQuadOptCtrl over the half
+% cycle, and converts it to a full cycle of a symmetrical gait.
+%
+% soltype: (case insensitive)
+%   'solution': will use the GPOPS-II output at collocation points
+%   'interpsolution': will use the GPOPS-II output interpolated between
+%   collocation points
 
 if nargin < 2
     soltype = 'solution';
 end
 soltype = lower(soltype);
 
-auxdata = output.result.setup.auxdata;
+auxdata = GPOPSoutput.result.setup.auxdata;
 try
 istate = auxdata.index.variables.state;
 catch
@@ -16,8 +23,8 @@ catch
    istate.dtheta = 6;
 end
 
-t = output.result.(soltype).phase.time;
-X = output.result.(soltype).phase.state;
+t = GPOPSoutput.result.(soltype).phase.time;
+X = GPOPSoutput.result.(soltype).phase.state;
 D = auxdata.D;
 
 % Values are half stride; double up

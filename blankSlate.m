@@ -1,5 +1,1 @@
-function blankSlate
-
-close all;
-clc;
-clear;
+clc; clear; close all;
