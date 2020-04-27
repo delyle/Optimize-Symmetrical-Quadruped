@@ -5,6 +5,10 @@ Dependencies:
 * [GPOPS-II](http://www.gpops2.com/)
 * [SNOPT](https://ampl.com/products/solvers/solvers-we-sell/snopt/)
 
+[Preprint](https://www.biorxiv.org/content/10.1101/2020.04.24.060509v1)
+
+This software uses through-contact optimization (the general approach is described in [this PLOS Comp Biol paper](https://dx.doi.org/10.1371%2Fjournal.pcbi.1007444)) to find symmetrical gaits that optimize a work-based objective. This particular code was used to explore the effect of speed and moment of inertia on optimal gait, as described in [this preprint](https://www.biorxiv.org/content/10.1101/2020.04.24.060509v1). Optimal solutions and their beat number for a large set of moment of inertia and speed are also provided as MATLAB binaries.
+
 This code runs in MATLAB and has been tested on MATLAB 2019a.
 
 ## Running the code
