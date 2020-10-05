@@ -167,7 +167,7 @@ elseif isstruct(guess)
         % Normally GPOPS will automatically downsample the guess.
         % This line ensures that is uses the exact same mesh of the guess
         setup.mesh.phase = guess1.result.setup.mesh.phase;
-        auxdata.setMesh = false;
+        auxdata.setMesh = [];
     end
     if isfield(auxdata,'perturb') && auxdata.perturb
        % This will perturb the guess by adding Gaussian noise
@@ -186,7 +186,9 @@ end
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
-
+if isfield(auxdata,'mesh')
+   setup.mesh = auxdata.mesh; 
+end
 setup.mesh.maxiterations                = auxdata.meshMaxIter;
 setup.mesh.tolerance                    = auxdata.meshtolerance;
 

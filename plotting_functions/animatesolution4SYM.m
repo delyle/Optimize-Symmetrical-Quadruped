@@ -66,7 +66,6 @@ y3 = interp1(t2,y2,tq,'pchip');
 theta3 = interp1(t2,theta2,tq,'pchip');
 
 % Make new inertial reference frame at average horizontal speed
-
 x0 = tq*D;
 
 % Get new footfall locations

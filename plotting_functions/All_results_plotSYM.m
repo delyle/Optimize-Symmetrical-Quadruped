@@ -1,9 +1,15 @@
-function All_results_plotSYM(GPOPSoutput)
+function All_results_plotSYM(GPOPSoutput,gridtype)
 % Plot results from a single solution of SymQuadOptCtrl
 
-t = GPOPSoutput.result.solution.phase.time;
-X = GPOPSoutput.result.solution.phase.state;
-P = GPOPSoutput.result.solution.parameter;
+if nargin < 2
+    gridtype = 'interpsolution';
+end
+
+t = GPOPSoutput.result.(gridtype).phase.time;
+X = GPOPSoutput.result.(gridtype).phase.state;
+P = GPOPSoutput.result.(gridtype).parameter;
+
+
 
 auxdata = GPOPSoutput.result.setup.auxdata;
 F = X(:,7:11);
