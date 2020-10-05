@@ -5,7 +5,7 @@ blankSlate % clear the workspace
 
 %%%% User inputs %%%%
 
-pdir = [pwd,'/Data/mf0p5']; % directory containing T*/I* directories
+pdir = [pwd,'/Data/mf0.5']; % directory containing T*/I* directories
 
 updateBest = false; % if true, the script will run GetBestOutputSym in each data directory (for some set of I and T)
 
@@ -25,12 +25,13 @@ for i = 1:length(list1)
         sn = [cdir2,'/BestResultPseudoGlobal'];
         if updateBest
             disp(['----',list1(i).name,', ',list2(j).name,'----'])
-            out = GetBestOutputSym(cdir2,'matsavename','BestResultWFR',...
+            out = GetBestOutputSym(cdir2,'matsavename','BestResultPseudoGlobal',...
                 'usepreviousbest',true,'oknoprevbest',true,...
+                'BipedDetect','pitch','updatedresult','finemesh',...
                 'prevbestname','BestResultPseudoGlobal.mat','Optimizer','objective');
-           
+            
             if out.newsol
-                A = load(sn); 
+                A = load(sn);
                 animatesolution4SYM(A.outputBest,sn)
                 All_results_plotSYM(A.outputBest);
                 if datetime(version('-date')) > datetime('February 24, 2020')
@@ -42,14 +43,15 @@ for i = 1:length(list1)
                 disp('Solution is unchanged')
             end
         end
-            A = load(sn); % reload optimal solution
-            auxdata = A.outputBest.result.setup.auxdata;
-            Optimal(l).auxdata = auxdata;
-            Optimal(l).sol = A; % GPOPS-II output
-            Optimal(l).obj = A.outputBest.result.objective;
-            Optimal(l).I = auxdata.I*4; % convert to murphy number
-            Optimal(l).U = auxdata.Uf; % speed
-            Optimal(l).T = sqrt(1/auxdata.Fr); % Stride period
+        A = load(sn); % reload optimal solution
+        auxdata = A.outputBest.result.setup.auxdata;
+        Optimal(l).auxdata = auxdata;
+        Optimal(l).sol = A; % GPOPS-II output
+        Optimal(l).obj = A.outputBest.result.objective;
+        Optimal(l).I = auxdata.I*4; % convert to murphy number
+        Optimal(l).U = auxdata.Uf; % speed
+        Optimal(l).D = auxdata.D; % stride length, normalized to body length
+        Optimal(l).T = auxdata.D/auxdata.lmax(1)./auxdata.Uf; % Stride period, normalized to front limb length
     end
 end
 

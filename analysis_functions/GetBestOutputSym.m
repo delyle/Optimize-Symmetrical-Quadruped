@@ -95,6 +95,8 @@ addParameter(p,'UsePreviousBest',false,@islogical)
 addParameter(p,'PrevBestName','BestResult.mat',@isstr)
 addParameter(p,'oknoprevbest',false,@islogical)
 addParameter(p,'redoconstrainttest',false,@islogical)
+validStr = {'','LRL','LiuRao-Legendre','dFL','dFlmax','finemesh','refinedmesh'};
+addParameter(p,'updatedresult','',@(x) any(strcmpi(x,validStr)))
 parse(p,ParentDir,varargin{:})
 
 MeshErrorTol = p.Results.MeshErrorTol;
@@ -110,6 +112,8 @@ oknoprevbest = p.Results.oknoprevbest;
 PrevBestName = p.Results.PrevBestName;
 BipedDetect = p.Results.BipedDetect;
 RedoConstraintTest = p.Results.redoconstrainttest;
+updatedResult = p.Results.updatedresult;
+
 
 UseSuppliedMeshErrTol = false;
 if strcmpi(MeshErrorTol,'supplied')
@@ -165,10 +169,21 @@ end
 if ~PrevBest
     objectiveBest = 1e9;
 end
+switch upper(updatedResult)
+    case {'LRL','LIURAO-LEGENDRE'}
+        matname = 'solLRL.mat';
+    case {'DFL','DFLMAX'}
+        matname = 'soldFlmax.mat';
+    case {'REFINEDMESH','FINEMESH'}
+        matname = 'solFineMesh.mat';
+    otherwise
+        matname = 'sol.mat';
+end
+
 
 for curDir = Folders
     curPath = [ParentDir,'/',curDir{1}];
-    listing = dir([curPath,'/sol.mat']);
+    listing = dir([curPath,'/',matname]);
     if verbose
         disp(['Currently analyzing ',curDir{1}])
     end

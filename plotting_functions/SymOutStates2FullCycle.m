@@ -8,7 +8,7 @@ function [t2,x2,y2,theta2,F2,u2,v2,w2] = SymOutStates2FullCycle(GPOPSoutput,solt
 %   collocation points
 
 if nargin < 2
-    soltype = 'solution';
+    soltype = 'interpsolution';
 end
 soltype = lower(soltype);
 

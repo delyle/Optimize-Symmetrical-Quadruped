@@ -50,7 +50,7 @@ auxdata.lmax = lmax;
 if strcmp(pdir(end),'/') || strcmp(pdir(end),'\') % remove extraneous '/'
     pdir=  pdir(1:end-1);
 end
-pdir1 = strrep([pdir,'/mf',num2str(auxdata.mf,2)],'.','p');
+pdir1 = [pdir,'/mf',num2str(auxdata.mf,2)];
 
 % Make the temporary directory. Appended with the current time to avoid
 % conflicts from multiple instances 
@@ -126,13 +126,29 @@ for h = 1:length(T)
                 saveas(gcf,[savedir,'/sol.png'])
             end
             save([savedir,'/sol.mat'],'out*')
-            animatesolution4SYM(out,[savedir,'/sol'],[1 1 1])
+            
+            % refine mesh
+            if out.result.nlpinfo < 10 && out.result.maxerror < out.result.setup.mesh.tolerance
+                disp(['Refining ',sn(i,:)])
+                out = updateFineMesh(out,false); % recompute over a finer mesh
+                close all
+                All_results_plotSYM(out)
+                if d > datetime('February 24, 2020')
+                    exportgraphics(gcf,[savedir,'/solFineMesh.pdf'],'ContentType','vector')
+                else
+                    saveas(gcf,[savedir,'/solFineMesh.png'])
+                end
+                
+                animatesolution4SYM(out,[savedir,'/solFineMesh'],[1 1 1],true,0.02,'PMLIMBS')
+                save([savedir,'/solFineMesh.mat'],'out*','auxdata')
+            end
         end
     end
     if newsol
         cd(cdir)
         pause(0.5)
-        GetBestOutputSym(pwd,'optimizer','objective','matsavename','BestResultPseudoGlobal','BipedDetect','pitch'); 
+        GetBestOutputSym(pwd,'optimizer','objective','updatedresult','finemesh',...
+            'matsavename','BestResultPseudoGlobal','BipedDetect','pitch'); 
         A = load('BestResultPseudoGlobal');
         animatesolution4SYM(A.outputBest,'BestResultPseudoGlobal')
         All_results_plotSYM(A.outputBest);

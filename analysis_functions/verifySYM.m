@@ -59,7 +59,7 @@ end
 % Check that limbs do not produce force when the limb length exceeds
 % maximum value, i.e. F*(lmax - l) >= 0
 
-forcetol = 0.01;
+forcetol = 0.02;
 limboff = absF < forcetol;
 
 absLon = absL;
