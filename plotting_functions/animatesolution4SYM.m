@@ -84,6 +84,7 @@ lmaxF = auxdata.lmax(1);
 lmaxH = auxdata.lmax(2);
 lmax = max(auxdata.lmax);
 F = abs(F3./Fmax);
+threshold = threshold/Fmax; % as force is normalized to Fmax, normalize the threshold too
 tau = auxdata.tau;
 Uh = D*sqrt(tau/lmaxH);
 Ihat = auxdata.I*4;
