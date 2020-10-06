@@ -9,7 +9,7 @@ Dependencies:
 
 This software uses through-contact optimization (the general approach is described in [this PLOS Comp Biol paper](https://dx.doi.org/10.1371%2Fjournal.pcbi.1007444)) to find symmetrical gaits that optimize a work-based objective. This particular code was used to explore the effect of speed and moment of inertia on optimal gait, as described in [this preprint](https://www.biorxiv.org/content/10.1101/2020.04.24.060509v1). Optimal solutions and their beat number for a large set of moment of inertia and speed are also provided as MATLAB binaries.
 
-This code runs in MATLAB and has been tested on MATLAB 2019a.
+This code runs in MATLAB and has been tested on MATLAB 2019a for macOS.
 
 ## Running the code
 
@@ -45,6 +45,6 @@ If the user wants to compile their own data, run `CompileOptimalSolutions` and t
 
 This script creates a plot showing gait regions as a function of Murphy number and normalized speed.
 
-Out of the box, it should reproduce figure 2a in the paper. A path to custom data, produced by `MAIN_DetectGaitTypes`, can be specified on line 11 in `MAIN_GaitTypeFigure`.
+Out of the box, it should reproduce figure 3a in the paper. A path to custom data, produced by `MAIN_DetectGaitTypes`, can be specified on line 11 in `MAIN_GaitTypeFigure`.
 
 
