@@ -31,7 +31,7 @@ mf = 0.5; % fore-hind center of mass bias
 T = [1.5 1.5 1.5 2.5 2.5 2.5 3.5 3.5 3.5]; % Stride Time 
 I = [0.75 1 1.5 0.75 1 1.5 0.75 1 1.5]; % Murphy number (normalized pitch moment of inertia). Must be the same length as I
 
-n = 5; % maximum number of guesses to use per T / I combination
+n = 10; % maximum number of guesses to use per T / I combination
 pdir = [pwd,'/Data/']; % Path to parent directory. Data will be saved here. Use absolute path
 UvsTfun = @(T) (T/2.4).^(-1/0.32); % function to convert stride time to speed. Derived from Alexander & Jayes 1983 J. Zool. Lond. 201:135-152
 %%%%%%%%%%%%%%%%%%%%% 

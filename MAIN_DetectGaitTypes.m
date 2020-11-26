@@ -12,7 +12,9 @@ blankSlate
 %%%% User Data %%%%
 beattol = [0.3 0.03]; % [MinPeakHeight MinPeakDistance]
 runtol  = 1e-2; % minimal force for contact (units of mg)
-data_path = [pwd,'/Data/BestGaitSolutions.mat']; % path to data file
+data_path = [pwd,'/Data/BestGaitSolutionsPaper.mat']; % path to data file. 
+% ^^ If you run MAIN_SolveSymQuad followed by CompileOptimalSolutions, the
+% relevant file will be in Data/mf0.5
 show_plot = true; % show a plot of the raw data, and how it looks once missing data are filled
 %%%%%%%%%%%%%%%%%%%
 

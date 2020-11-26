@@ -18,6 +18,29 @@ This code runs in MATLAB and has been tested on MATLAB 2019a for macOS.
 3. You can copy the contents of `add_necessary_paths` to your `startup.m` file to add the paths on MATLAB startup
 4. Make sure that GPOPS-II and SNOPT are in your path as well
 
+### Perform your own optimization
+
+
+#### Run optimization
+To run an optimization yourself, first run `MAIN_SolveSymQuad`. Parameters can be adjusted in the first section of the script. With default parameters, the code generates a sparse dataset in a reasonable amount of time (though it may take up to an hour depending on hardware).
+
+#### Compile results
+To compile results, run `CompileOptimalSolutions`. This makes a single MATLAB binary with pseudoglobal optimal solutions for easy access. With default parameters in `MAIN_SolveSymQuad`, the script will run correctly as-is. Otherwise, be sure it is pointing to the correct directory (see user parameters in the script)
+
+#### Detect Gait Types
+Next, run `MAIN_DetectGaitTypes`. As written, the script uses the gait detection parameters from the paper, and points to a compiled datafile with data from the paper.
+
+This file will map an optimal solution to a gait, based on its beat number and whether it is a "walk" or "run".
+
+If you have generated your own data, be sure to set `data_path` to the correct data file, which should be something like `Data/mf*/BestGaitSolutions*.mat`, where `*` can be different numbers depending on parameters and time that files were generated. Note that the parent data directory here is `Data/mf*`.
+
+If the script runs correctly, it will save a file in the parent data directory called `GaitTypeData*.mat`.
+
+#### Gait Type figure
+Finally, run `MAIN_GaitTypeFigure`. As written, the file retrieves data from the paper. If using your own data, make sure `data_path` points to the `GaitTypeData*.mat` file you generated above. Adjust `data_path` in the user inputs section of the script.
+
+This file will generate a figure similar to Fig 3a in the paper.
+
 ## MAIN_SolveSymQuad
 
 This script iterates through some combination of normalized Murphy number ($I/mL^2$) and T' ($T\sqrt{g/(2L)}$) to find the optimal gait for each combination.
@@ -30,7 +53,7 @@ The script can be run with multiple instances of matlab in parallel. It will aut
 
 Because of this feature, note that if the script is terminated early andrerun, it will start at the next guess after the one in which it was terminated (even if GPOPS-II did not complete its operation for that guess).
 
-If the script is terminated early, a temporary directory with a (potentially very large) SNOPT text file will remain in pdir. This can be safely deleted manually if the script is not running.
+If the script is terminated early, a temporary directory `tmp*`with a (potentially very large) SNOPT text file will remain in pdir. This directory can be safely deleted manually if the script is not running.
 
 ## MAIN_DetectGaitTypes
 

@@ -9,6 +9,7 @@ blankSlate % clear the worspace
 %%%% USER INPUTS %%%% 
 FS = 14; % fontsize for axis labels
 data_path = 'Data/GaitTypeData0.3_0.03_0.01.mat'; % path to relevant gait data
+% ^^ If you have created your own data, by default it will be saved in Data/mf*/
 %%%%%%%%%%%%%%%%%%%%%
 
 load(data_path)
@@ -89,19 +90,9 @@ plot(Urange,I*[1 1],'k-','linewidth',LW)
 I = 0.99;
 plot(Urange,I*[1 1],'k-','linewidth',LW)
 
-% RAMone
+% Quadrupedal robot (Xi et al. 2016 DOI: 10.1177/0278364915612572)
 I = 0.57;
 plot(Urange,I*[1 1],'k-','linewidth',LW)
 
-%% add secondary x axis for stride time
-
-T = 1.5:0.5:4;
-Utick = fliplr((T/2.4).^(1/-0.32));
-xticktxt = fliplr(strsplit(num2str(T),' '));
-ax2 = axes('Position', get(ax1, 'Position'),'Color', 'none');
-set(ax2, 'XAxisLocation', 'top','YAxisLocation','right','ytick',[],...
-    'xscale','log','xlim',ax1.XLim,'xtick',[],'Xtick',Utick,'xticklabels',xticktxt,'linewidth',1);
-
-xlabel('$T \sqrt{g/2L}$','interpreter','latex','fontsize',FS)
 
 

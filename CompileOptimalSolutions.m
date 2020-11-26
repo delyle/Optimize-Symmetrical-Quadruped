@@ -5,7 +5,7 @@ blankSlate % clear the workspace
 
 %%%% User inputs %%%%
 
-pdir = [pwd,'/Data/mf0.5']; % directory containing T*/I* directories
+pdir = [pwd,'/Data/mf0.5']; % directory containing T*/I* subdirectories
 
 updateBest = false; % if true, the script will run GetBestOutputSym in each data directory (for some set of I and T)
 
