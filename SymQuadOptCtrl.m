@@ -32,7 +32,7 @@ D = auxdata.D; % stride length per body length (lb)
 l = auxdata.lmax; % [forelimb, hindlimb] lengths relative to lb
 
 if ~isfield(auxdata,'abounds')
-    auxdata.abounds = pi*[-1 1]; % bounds on body pitch angle
+    auxdata.abounds = pi/2*[-1 1]; % bounds on body pitch angle
 end
 abounds = auxdata.abounds;
 
