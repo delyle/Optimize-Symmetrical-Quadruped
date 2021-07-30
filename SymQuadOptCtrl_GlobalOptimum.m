@@ -138,6 +138,7 @@ end
     cd(ParentDir)
     pause(0.5)
     
+    try
     GetBestOutputSym(pwd,'matsavename','BestResultWFR','IsRecovery',OptimizeOnRecovery);
     A = load('BestResultWFR');
     animatesolution4SYM(A.outputBest,'BestResultWFR')
@@ -149,6 +150,9 @@ end
     animatesolution4SYM(A.outputBest,'BestResultWork')
     All_results_plotSYM(A.outputBest);
     export_fig('BestResultWork.pdf')
+    catch
+        warning('Error getting Best WFR, Work')
+    end
     
     GetBestOutputSym(pwd,'optimizer','objective','matsavename','BestResultTotObj','IsRecovery',OptimizeOnRecovery);
     A = load('BestResultTotObj');

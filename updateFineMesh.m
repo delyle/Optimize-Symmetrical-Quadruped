@@ -1,8 +1,19 @@
-function GPOPSoutput = updateFineMesh(GPOPSinput,plotfigures)
+function GPOPSoutput = updateFineMesh(GPOPSinput,PM_NW,plotfigures)
 % This function takes GPOPSinput, resulting from SymQuadOptCtrl, and
 % interpolates additional collocation points midway between existing
 % points. This serves as a guess for a new round of optimization using
 % GPOPS-II, resulting in GPOPSoutput.
+%
+% PM_NW is a logical vector of length two. First element is point mass,
+% second is whether optimization is on net work. If length == 1, we will
+% assume we're not optimizing on net work
+
+pointmass = PM_NW(1);
+if length(PM_NW) == 1
+    NetWork = false;
+else
+    NetWork = PM_NW(2);
+end
 
 F = GPOPSinput.result.solution.phase.state(:,7:11);
 Fi = GPOPSinput.result.interpsolution.phase.state(:,7:11);
@@ -30,7 +41,20 @@ intfun = @(xi) interp1(ti,xi,tq);
 Xi = GPOPSinput.result.interpsolution.phase.state;
 Ui = GPOPSinput.result.interpsolution.phase.control;
 
-
+if pointmass
+   Xi(:,[3,6]) = []; % remove angular positions if it's a pointmass
+   if NetWork
+       GPOPSfun = @SymQuadOptCtrl_pointmass_Rec;
+   else
+        GPOPSfun = @SymQuadOptCtrl_pointmass;
+   end
+else
+    if NetWork
+        GPOPSfun = @SymQuadOptCtrl_Rec;
+    else
+        GPOPSfun = @SymQuadOptCtrl;
+    end
+end
 
 old_colpoints = GPOPSinput.result.setup.mesh.phase.colpoints;
 new_colpoints = old_colpoints*2;
@@ -46,5 +70,4 @@ auxdata.meshMaxIter = 8;
 auxdata.LimbWork = logical(auxdata.LimbWork);
 auxdata.downsample = false;
 
-GPOPSoutput = SymQuadOptCtrl(auxdata,input);
-
+GPOPSoutput = GPOPSfun(auxdata,input);

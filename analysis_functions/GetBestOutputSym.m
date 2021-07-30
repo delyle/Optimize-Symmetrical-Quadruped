@@ -95,6 +95,7 @@ addParameter(p,'UsePreviousBest',false,@islogical)
 addParameter(p,'PrevBestName','BestResult.mat',@isstr)
 addParameter(p,'oknoprevbest',false,@islogical)
 addParameter(p,'redoconstrainttest',false,@islogical)
+addParameter(p,'IsRecovery',false,@islogical)
 validStr = {'','LRL','LiuRao-Legendre','dFL','dFlmax','finemesh','refinedmesh'};
 addParameter(p,'updatedresult','',@(x) any(strcmpi(x,validStr)))
 parse(p,ParentDir,varargin{:})
