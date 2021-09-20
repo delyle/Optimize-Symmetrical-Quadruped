@@ -17,7 +17,7 @@ addParameter(p,'PointMass',false, @(x) isscalar(x))
 addParameter(p,'c5final',[100 1000],@(x) isnumeric(x) && length(x) == 2)
 addParameter(p,'forcethirditeration',false, @isscalar)
 addParameter(p,'meshmethods',{'hp-PattersonRao','hp-PattersonRao','hp-PattersonRao'},@(x) iscell(x) && length(x) == 3)
-addParameter(p,'savevideos',true,@isscalar)
+addParameter(p,'savevideos',false,@isscalar)
 parse(p,ParentDir,auxdata,varargin{:})
 
 
@@ -130,7 +130,7 @@ for i = 1:size(sn,1)
         try
             export_fig([savedir,'/sol.pdf'])
         catch
-            print(gcf, '-dpdf',[savedir,'/sol.pdf']);
+            print(gcf, '-dpdf', 'Paper_Batracho_Main.pdf');
         end
             
         save([savedir,'/sol.mat'],'out*')
