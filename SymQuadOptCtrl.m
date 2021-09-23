@@ -61,6 +61,13 @@ if isfield(auxdata,'LimbWork')
 else
     auxdata.LimbWork = true; % calculate limb work for objective. If false, will calculate a limb's contribution to COM work
 end
+
+if isfield(auxdata,'Fr')
+   % an old convention, update for compatibility
+   auxdata.tau = auxdata.Fr;
+   auxdata = rmfield(auxdata,'Fr');
+end
+
 auxdata.LimbWork = double(auxdata.LimbWork); %converts the logical to a double.
 
 %-------------------------------------------------------------------%
@@ -200,7 +207,7 @@ end
 %--------------------------- Problem Setup -------------------------%
 %-------------------------------------------------------------------%
 if ~isfield(auxdata,'name')
-    auxdata.name = 'SymQuadOptCtrl';
+    auxdata.name = ['S4OC_',date_prefix('yyyymmddHHMMSS')];
 end
 setup.name                        = auxdata.name;
 setup.functions.continuous        = @Continuous;

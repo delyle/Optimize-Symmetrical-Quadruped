@@ -123,13 +123,13 @@ elseif strcmpi(MeshErrorTol,'none')
     MeshErrorTol = Inf;
 end
 
-% ensure that ParentDir does not end with '/'
-if strcmp(ParentDir(end),'/')
+% ensure that ParentDir does not end with a '/' or '\'
+if strcmp(ParentDir(end),filesep)
     ParentDir = ParentDir(1:end-1);
 end
 % Find all folders that start with rand_guess
 
-listing = dir([ParentDir,'/rand_guess*']);
+listing = dir([ParentDir,filesep,'rand_guess*']);
 
 nGuessesAvailable = length(listing);
 

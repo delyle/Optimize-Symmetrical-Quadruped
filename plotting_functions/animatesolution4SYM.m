@@ -85,7 +85,12 @@ lmaxH = auxdata.lmax(2);
 lmax = max(auxdata.lmax);
 F = abs(F3./Fmax);
 threshold = threshold/Fmax; % as force is normalized to Fmax, normalize the threshold too
-tau = auxdata.tau;
+if isfield(auxdata,'Fr')
+    % for backwards compatibility with old convention.
+    tau = auxdata.Fr;
+else
+    tau = auxdata.tau;
+end
 Uh = D*sqrt(tau/lmaxH);
 Ihat = auxdata.I*4;
 if isfield(auxdata,'c')
