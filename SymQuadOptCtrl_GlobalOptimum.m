@@ -28,6 +28,10 @@ auxdata = updateAux(auxdata,'mf',p.Results.mf);
 auxdata = updateAux(auxdata,'I',p.Results.I);
 auxdata = updateAux(auxdata,'lmax',p.Results.lmax);
 
+% Update auxdata if user hasn't supplied value
+if ~isfield(auxdata,'name')
+   auxdata.name = ['S4OC_',date_prefix('yyyymmddHHSS')];
+end
 
 
 % Retrieve other values

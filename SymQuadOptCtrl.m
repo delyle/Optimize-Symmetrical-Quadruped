@@ -207,7 +207,7 @@ end
 %--------------------------- Problem Setup -------------------------%
 %-------------------------------------------------------------------%
 if ~isfield(auxdata,'name')
-    auxdata.name = ['S4OC_',date_prefix('yyyymmddHHMMSS')];
+    auxdata.name = 'S4OC';
 end
 setup.name                        = auxdata.name;
 setup.functions.continuous        = @Continuous;
