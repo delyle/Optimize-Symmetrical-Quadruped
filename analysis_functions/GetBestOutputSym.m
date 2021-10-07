@@ -15,14 +15,11 @@ function out = GetBestOutputSym(ParentDir,varargin)
 % 'MeshErrorTol' ?- use tolerances supplied by GPOPS-II, or ignore 
 %  'supplied' (default) | 'none' 
 %
-%
 % 'DiplayResult' -- display path of pseudo-global optimal solution
 %  true (default) | false
 %
-%
 % 'SaveResults' -- save the results as a matlab binary
 % true (default) | false
-%
 %
 % 'Verbose' -- display function progress
 % true (default) | false
@@ -35,6 +32,8 @@ function out = GetBestOutputSym(ParentDir,varargin)
 % 'work+forcerate' calculate those objectives separate from any other
 % component(s) of the objective.
 %
+% 'DirectWork' if true, work is calculated directly from force and length
+% changes. If false, slack variables are used.
 %
 % 'MATSaveName' -- name of .mat file to save pseudo-global optimum
 % 'BestResult' (default) | string
@@ -82,19 +81,20 @@ p = inputParser;
 addRequired(p,'ParentDir',@isstr)
 validStr = {'supplied','none'};
 addParameter(p,'MeshErrorTol','supplied',@(x) (isscalar(x) && isnumeric(x)) || any(strcmpi(x,validStr)) )
-addParameter(p,'DisplayResult',true,@islogical)
-addParameter(p,'SaveResults',true,@islogical)
-addParameter(p,'Verbose',true,@islogical)
+addParameter(p,'DisplayResult',true,@(x) islogical(x) || isscalar(x))
+addParameter(p,'SaveResults',true,@(x) islogical(x) || isscalar(x))
+addParameter(p,'Verbose',true,@(x) islogical(x) || isscalar(x))
 addParameter(p,'Optimizer','work+forcerate',@isstr)
+addParameter(p,'DirectWork',false,@(x) islogical(x) || isscalar(x))
 addParameter(p,'MATSaveName','BestResult',@isstr)
 addParameter(p,'ConvergeCrit','SNOPTGPOPS',@isstr) %'SNOPT','GPOPS','SNOPTGPOPS'
 addParameter(p,'GuessRange',Inf,@isnumeric)
 validStr = {'none','pitch','ensurealllimbs'};
 addParameter(p,'BipedDetect','pitch',@(x) any(strcmpi(x,validStr)))
-addParameter(p,'UsePreviousBest',false,@islogical)
+addParameter(p,'UsePreviousBest',false,@(x) islogical(x) || isscalar(x))
 addParameter(p,'PrevBestName','BestResult.mat',@isstr)
-addParameter(p,'oknoprevbest',false,@islogical)
-addParameter(p,'redoconstrainttest',false,@islogical)
+addParameter(p,'oknoprevbest',false,@(x) islogical(x) || isscalar(x))
+addParameter(p,'redoconstrainttest',false,@(x) islogical(x) || isscalar(x))
 addParameter(p,'IsRecovery',false,@islogical)
 validStr = {'','LRL','LiuRao-Legendre','dFL','dFlmax','finemesh','refinedmesh'};
 addParameter(p,'updatedresult','',@(x) any(strcmpi(x,validStr)))
@@ -105,6 +105,7 @@ DisplayResult = p.Results.DisplayResult;
 SaveResults = p.Results.SaveResults;
 verbose = p.Results.Verbose;
 optimizer = p.Results.Optimizer;
+directWork = p.Results.DirectWork;
 MATSaveName = p.Results.MATSaveName;
 cc = p.Results.ConvergeCrit;
 PrevBest = p.Results.UsePreviousBest;
@@ -249,7 +250,7 @@ for curDir = Folders
             end
         end
         if  all(crit)
-            objective = getopt(output,optimizer);
+            objective = getopt(output,optimizer,directWork);
             if objective < objectiveBest
                 newsol = true;
                 objectiveBest = objective;
@@ -285,7 +286,7 @@ disp('Process Completed')
 
 end
 
-function objective = getopt(output,optimizer)
+function objective = getopt(output,optimizer,directWork)
 
 switch optimizer
     case {'prec','recovery','rec'}
@@ -293,11 +294,11 @@ switch optimizer
     case 'objective'
         objective = output.result.objective;
     case 'work'
-        [objective,~,~] = CostComponents(output);
+        [objective,~,~] = CostComponents(output,directWork);
     case 'forcerate'
         [~,objective,~] = CostComponents(output);
     case 'work+forcerate'
-        [work,forcerate,~] = CostComponents(output);
+        [work,forcerate,~] = CostComponents(output,directWork);
         objective = work+(forcerate);
     otherwise
         error('Invalid optimizer. Must be ''objective'', ''work'', ''forcerate'', or ''work+forcerate''')
