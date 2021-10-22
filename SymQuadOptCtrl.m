@@ -32,7 +32,7 @@ D = auxdata.D; % stride length per body length (lb)
 l = auxdata.lmax; % [forelimb, hindlimb] lengths relative to lb
 
 if ~isfield(auxdata,'abounds')
-    auxdata.abounds = pi*[-1 1]; % bounds on body pitch angle
+    auxdata.abounds = pi/2*[-1 1]; % bounds on body pitch angle
 end
 abounds = auxdata.abounds;
 
@@ -61,7 +61,16 @@ if isfield(auxdata,'LimbWork')
 else
     auxdata.LimbWork = true; % calculate limb work for objective. If false, will calculate a limb's contribution to COM work
 end
+
+if isfield(auxdata,'Fr')
+   % an old convention, update for compatibility
+   auxdata.tau = auxdata.Fr;
+   auxdata = rmfield(auxdata,'Fr');
+end
+
 auxdata.LimbWork = double(auxdata.LimbWork); %converts the logical to a double.
+
+auxdata = addIndices(auxdata);% adds indices to the auxdata for future reference
 
 %-------------------------------------------------------------------%
 %------------------------- Variable Bounds -------------------------%
@@ -118,8 +127,14 @@ bounds.phase(i).integral.lower = 0*ones(1,3);                 % row vector, leng
 bounds.phase(i).integral.upper = 100*ones(1,3);                 % row vector, length = numintegrals
 
 % Footfall locations: PLH PTF
+if isfield(auxdata, 'FootPosBounds')
+    % Use the user-provided bounds
+    bounds.parameter.lower = auxdata.FootPosBounds.lower;
+    bounds.parameter.upper = auxdata.FootPosBounds.upper;
+else
 bounds.parameter.lower = -(1+sum(l))*[1 1];                      % row vector, length = numintegrals
 bounds.parameter.upper = (D+1+sum(l))*[1 1];                      % row vector, length = numintegrals
+end
 
 % Endpoint constraints
 % 5 Kinematic periodicity: yauvw(0.5) - yauvw(0) = 0
@@ -134,14 +149,13 @@ bounds.eventgroup.upper = zeros(1,8); % row vector
 % 5 complementary: F_i*(l_i - l_imax) >= 0
 % 2 normal: y - rH*sin(a) >= 0, y + rF*sin(a) >= 0
 % 5 normal: F_i*dl - p_i + q_i = 0
-% ----- PHASE 1 ----- %
 i = 1;
 bounds.phase(i).path.lower = zeros(1,13); % row vector, length = number of path constraints in phase
 bounds.phase(i).path.upper = [0, Fmax*max(l)*[1 1 1 1 1], 1 + 4*max(l)*[1 1], [0 0 0 0 0]]; % row vector, length = number of path constraints in phase
+
 %-------------------------------------------------------------------------%
 %---------------------------- Provide Guess ------------------------------%
 %-------------------------------------------------------------------------%
-% ----- PHASE 1 ----- %
 
 if isempty(guess)
     % Make a random guess
@@ -200,7 +214,7 @@ end
 %--------------------------- Problem Setup -------------------------%
 %-------------------------------------------------------------------%
 if ~isfield(auxdata,'name')
-    auxdata.name = 'SymQuadOptCtrl';
+    auxdata.name = 'S4OC';
 end
 setup.name                        = auxdata.name;
 setup.functions.continuous        = @Continuous;
@@ -382,4 +396,68 @@ G = 1+(ones(n(1),1)*s).*randn(n);
 
 A = G.*a;
 
+end
+
+function auxdata = addIndices(auxdata)
+
+% States:
+% 6 kinematic states: x, y, a, u, v, w
+% 5 forces: FLH FLFt FLFl FRH FRF
+% 1 integrated force: int_0^t FLF dt
+auxdata.index.variables.states.xy = 1:2;
+auxdata.index.variables.states.theta = 3;
+auxdata.index.variables.states.uv = 4:5;
+auxdata.index.variables.states.omega = 6;
+auxdata.index.variables.states.F = 7:11;
+auxdata.index.variables.states.intF = 12;
+
+% conventions for sides, given forces or force rates
+auxdata.index.side.left.all = 1:3;
+auxdata.index.side.left.hind = 1;
+auxdata.index.side.left.frontTrail = 2;
+auxdata.index.side.left.frontLead = 3;
+auxdata.index.side.right.all = 4:5;
+auxdata.index.side.right.hind = 4;
+auxdata.index.side.right.front = 5;
+
+% Controls:
+% 5 Force rate: Fdot
+% 2*5 slack variables for work: p, q
+% 5 relaxation parameters for limb length constraints
+% 1 relaxation parameter for simultaneous limb contact constraint
+auxdata.index.variables.control.Fdot = 1:5;
+auxdata.index.variables.control.p = 6:10;
+auxdata.index.variables.control.q = 11:15;
+auxdata.index.variables.control.s = 16:21; % all the relaxation parameters
+auxdata.index.variables.control.slimb = 16:20;
+auxdata.index.variables.control.ssimult = 21;
+
+% Parameters
+% Footfall locations: PLH PTF
+auxdata.index.variables.parameter.posLeftHind = 1;
+auxdata.index.variables.parameter.posLeftTrailFront = 2;
+
+% Integrals:
+% 1 integral for work
+% 1 integral for force rate
+% 1 integral for slack penalties
+auxdata.index.integral.work = 1;
+auxdata.index.integral.Fdot = 2;
+auxdata.index.integral.slackPen = 3;
+
+% Endpoint constraints
+% 5 Kinematic periodicity: yauvw(0.5) - yauvw(0) = 0
+% 3 Force continuity: FLH(0.5) - FRH(0) = FRF(0.5) - FTF(0) = FLF(0.5) - FRF(0) = 0
+auxdata.index.constraints.endpoint.kinPeriod = 1:5;
+auxdata.index.constraints.endpoint.forceContinuity = 6:8;
+
+% Path constraints
+% 1 complementary: FTF*int_0^t FLF dt = 0
+% 5 complementary: F_i*(l_i - l_imax) >= 0
+% 2 normal: y - rH*sin(a) >= 0, y + rF*sin(a) >= 0
+% 5 normal: F_i*dl - p_i + q_i = 0
+auxdata.index.constraints.path.trailLeadOverlap = 1;
+auxdata.index.constraints.path.legLength = 2:6;
+auxdata.index.constraints.path.aboveGround = 7:8;
+auxdata.index.constraints.path.powerToSlacks = 9:13;
 end
