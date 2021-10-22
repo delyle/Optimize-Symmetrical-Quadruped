@@ -127,8 +127,14 @@ bounds.phase(i).integral.lower = 0*ones(1,3);                 % row vector, leng
 bounds.phase(i).integral.upper = 100*ones(1,3);                 % row vector, length = numintegrals
 
 % Footfall locations: PLH PTF
+if isfield(auxdata, 'FootPosBounds')
+    % Use the user-provided bounds
+    bounds.parameter.lower = auxdata.FootPosBounds.lower;
+    bounds.parameter.upper = auxdata.FootPosBounds.upper;
+else
 bounds.parameter.lower = -(1+sum(l))*[1 1];                      % row vector, length = numintegrals
 bounds.parameter.upper = (D+1+sum(l))*[1 1];                      % row vector, length = numintegrals
+end
 
 % Endpoint constraints
 % 5 Kinematic periodicity: yauvw(0.5) - yauvw(0) = 0
