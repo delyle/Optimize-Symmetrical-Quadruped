@@ -1,4 +1,4 @@
-function SymQuadOptCtrl_GlobalOptimum(ParentDir,auxdata,varargin)
+function p = SymQuadOptCtrl_GlobalOptimum(ParentDir,auxdata,varargin)
 p = inputParser;
 addRequired(p,'ParentDir',@ischar)
 addRequired(p,'auxdata',@isstruct)
@@ -12,7 +12,7 @@ addParameter(p,'lmax', [], @(x) (isscalar(x) && isnumeric(x)) || isempty(x))
 
 addParameter(p,'FdotCost', 3e-5, @(x) isscalar(x) && isnumeric(x))
 addParameter(p,'RandIter',   50, @(x) isscalar(x) && isnumeric(x))
-addParameter(p,'Recovery',false, @(x) isscalar(x))
+addParameter(p,'NetCOMWork',false, @(x) isscalar(x))
 addParameter(p,'PointMass',false, @(x) isscalar(x))
 addParameter(p,'c5final',[100 1000],@(x) isnumeric(x) && length(x) == 2)
 addParameter(p,'forcethirditeration',false, @isscalar)
@@ -37,7 +37,7 @@ end
 % Retrieve other values
 FdotCost = p.Results.FdotCost;
 n = p.Results.RandIter;
-OptimizeOnRecovery = logical(p.Results.Recovery);
+OptimizeOnNCW = logical(p.Results.NetCOMWork);
 PointMass = logical(p.Results.PointMass);
 c5final = p.Results.c5final;
 forcethirditeration = logical(p.Results.forcethirditeration);
@@ -61,14 +61,14 @@ FdotcostScaled = FdotCost/sqrt(0.1)*sqrt(auxdata.tau);
 htoc = [];
 
 if PointMass
-    if OptimizeOnRecovery
-        GPOPSfun = @SymQuadOptCtrl_pointmass_Rec;
+    if OptimizeOnNCW
+        GPOPSfun = @SymQuadOptCtrl_pointmass_NCW;
     else
         GPOPSfun = @SymQuadOptCtrl_pointmass;
     end
 else
-    if OptimizeOnRecovery
-        GPOPSfun = @SymQuadOptCtrl_Rec;
+    if OptimizeOnNCW
+        GPOPSfun = @SymQuadOptCtrl_NCW;
     else
         GPOPSfun = @SymQuadOptCtrl;
     end
@@ -148,13 +148,13 @@ end
     pause(0.5)
     
     try
-    GetBestOutputSym(pwd,'matsavename','BestResultWFR','IsRecovery',OptimizeOnRecovery);
+    GetBestOutputSym(pwd,'matsavename','BestResultWFR','CostIsNCW',OptimizeOnNCW);
     A = load('BestResultWFR');
     animatesolution4SYM(A.outputBest,'BestResultWFR')
     All_results_plotSYM(A.outputBest);
     export_fig('BestResultWFR.pdf')
     
-    GetBestOutputSym(pwd,'optimizer','work','matsavename','BestResultWork','IsRecovery',OptimizeOnRecovery);
+    GetBestOutputSym(pwd,'optimizer','work','matsavename','BestResultWork','CostIsNCW',OptimizeOnNCW);
     A = load('BestResultWork');
     animatesolution4SYM(A.outputBest,'BestResultWork')
     All_results_plotSYM(A.outputBest);
@@ -163,7 +163,7 @@ end
         warning('Error getting Best WFR, Work')
     end
     
-    GetBestOutputSym(pwd,'optimizer','objective','matsavename','BestResultTotObj','IsRecovery',OptimizeOnRecovery);
+    GetBestOutputSym(pwd,'optimizer','objective','matsavename','BestResultTotObj','CostIsNCW',OptimizeOnNCW);
     A = load('BestResultTotObj');
     animatesolution4SYM(A.outputBest,'BestResultTotObj')
     All_results_plotSYM(A.outputBest);

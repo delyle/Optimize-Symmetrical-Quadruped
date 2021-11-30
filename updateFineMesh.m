@@ -44,13 +44,13 @@ Ui = GPOPSinput.result.interpsolution.phase.control;
 if pointmass
    Xi(:,[3,6]) = []; % remove angular positions if it's a pointmass
    if NetWork
-       GPOPSfun = @SymQuadOptCtrl_pointmass_Rec;
+       GPOPSfun = @SymQuadOptCtrl_pointmass_NCW;
    else
         GPOPSfun = @SymQuadOptCtrl_pointmass;
    end
 else
     if NetWork
-        GPOPSfun = @SymQuadOptCtrl_Rec;
+        GPOPSfun = @SymQuadOptCtrl_NCW;
     else
         GPOPSfun = @SymQuadOptCtrl;
     end
@@ -67,7 +67,9 @@ input.result.setup.mesh.phase.colpoints = new_colpoints;
 
 auxdata = GPOPSinput.result.setup.auxdata;
 auxdata.meshMaxIter = 8;
-auxdata.LimbWork = logical(auxdata.LimbWork);
+if isfield(auxdata,'LimbWork')
+    auxdata.LimbWork = logical(auxdata.LimbWork);
+end
 auxdata.downsample = false;
 
 GPOPSoutput = GPOPSfun(auxdata,input);

@@ -12,7 +12,7 @@ function out = GetBestOutputSym(ParentDir,varargin)
 % Note: ParentDir MUST be a global (not relative) path!
 %
 % --- Name-value pairs ---
-% 'MeshErrorTol' ?- use tolerances supplied by GPOPS-II, or ignore 
+% 'MeshErrorTol' -- use tolerances supplied by GPOPS-II, or ignore 
 %  'supplied' (default) | 'none' 
 %
 % 'DiplayResult' -- display path of pseudo-global optimal solution
@@ -95,7 +95,7 @@ addParameter(p,'UsePreviousBest',false,@(x) islogical(x) || isscalar(x))
 addParameter(p,'PrevBestName','BestResult.mat',@isstr)
 addParameter(p,'oknoprevbest',false,@(x) islogical(x) || isscalar(x))
 addParameter(p,'redoconstrainttest',false,@(x) islogical(x) || isscalar(x))
-addParameter(p,'IsRecovery',false,@islogical)
+addParameter(p,'CostIsNCW',false,@isscalar)
 validStr = {'','LRL','LiuRao-Legendre','dFL','dFlmax','finemesh','refinedmesh'};
 addParameter(p,'updatedresult','',@(x) any(strcmpi(x,validStr)))
 parse(p,ParentDir,varargin{:})
@@ -115,7 +115,7 @@ PrevBestName = p.Results.PrevBestName;
 BipedDetect = p.Results.BipedDetect;
 RedoConstraintTest = p.Results.redoconstrainttest;
 updatedResult = p.Results.updatedresult;
-
+CostIsNCW = p.Results.CostIsNCW;
 
 UseSuppliedMeshErrTol = false;
 if strcmpi(MeshErrorTol,'supplied')
@@ -128,6 +128,10 @@ end
 if strcmp(ParentDir(end),filesep)
     ParentDir = ParentDir(1:end-1);
 end
+
+% Sanitize ParentDir. Replace all '/' or '\' with the local filesep
+ParentDir = strrep(ParentDir,'/',filesep);
+ParentDir = strrep(ParentDir,'\',filesep);
 % Find all folders that start with rand_guess
 
 listing = dir([ParentDir,filesep,'rand_guess*']);
@@ -239,6 +243,8 @@ for curDir = Folders
         if all(crit)
             if isfield(f,'valid') && ~RedoConstraintTest
                 valid = f.valid; % check if this solution is already marked as valid
+            elseif CostIsNCW
+                valid = verifySYM_Rec(output,false);
             else
                 valid = verifySYM(output,false); % check path constraint violation
             end
