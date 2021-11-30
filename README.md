@@ -7,9 +7,15 @@ Dependencies:
 
 [Preprint](https://www.biorxiv.org/content/10.1101/2020.04.24.060509v1)
 
-This software uses through-contact optimization (the general approach is described in [this PLOS Comp Biol paper](https://dx.doi.org/10.1371%2Fjournal.pcbi.1007444)) to find symmetrical gaits that optimize a work-based objective. This particular code was used to explore the effect of speed and moment of inertia on optimal gait, as described in [this preprint](https://www.biorxiv.org/content/10.1101/2020.04.24.060509v1). Optimal solutions and their beat number for a large set of moment of inertia and speed are also provided as MATLAB binaries.
+This software uses through-contact optimization (the general approach is described in [this PLOS Comp Biol paper](https://dx.doi.org/10.1371%2Fjournal.pcbi.1007444)) to find symmetrical gaits that optimize a work-based objective. This particular code was used to explore the effect of speed and moment of inertia on optimal gait, as described in [this JEB paper](https://doi.org/10.1242/jeb.228296). Optimal solutions and their beat number for a large set of moment of inertia and speed are also provided as MATLAB binaries.
+
+The most recent version includes options to optimizing on three different measures of work: Net COM Work, Individual Limbs COM Work, or Limb Extension Work. The paper describing this is in preparation.
 
 This code runs in MATLAB and has been tested on MATLAB 2019a for macOS and MATLAB 2020b for Windows.
+
+If you use this code, please cite: 
+
+Polet, Delyle T. 2021. The Murphy number: how pitch moment of inertia dictates quadrupedal walking and running energetics. _J Exp Biol_ **224**(5): jeb228296. doi: https://doi.org/10.1242/jeb.228296
 
 ## Running the code
 
