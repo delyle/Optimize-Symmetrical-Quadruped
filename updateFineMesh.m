@@ -8,6 +8,11 @@ function GPOPSoutput = updateFineMesh(GPOPSinput,PM_NW,plotfigures)
 % second is whether optimization is on net work. If length == 1, we will
 % assume we're not optimizing on net work
 
+if nargin < 3
+    plotfigures = false;
+end
+
+
 pointmass = PM_NW(1);
 if length(PM_NW) == 1
     NetWork = false;
