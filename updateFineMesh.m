@@ -26,12 +26,12 @@ tq = t_mat(2:end)';
 if plotfigures
     figure;
     plot(t,F,'o');
-    resetcolor
+    set(gca,'colororderindex',1);
     hold on
     plot(ti,Fi);
     
     Fq = interp1(ti,Fi,tq,'linear');
-    resetcolor
+    set(gca,'colororderindex',1);
     plot(tq,Fq,'.')
     drawnow
 end
