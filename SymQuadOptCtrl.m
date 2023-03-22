@@ -84,8 +84,8 @@ bounds.phase(i).finaltime.upper = 0.5;                % scalar
 
 % States:
 % 6 kinematic states: x, y, a, u, v, w
-% 5 forces: FLH FLFt FLFl FRH FRF
-% 1 integrated force: int_0^t FLF dt
+% 5 forces: F_LH F_LFt F_LFl F_RH F_RF
+% 1 integrated force: int_0^t F_LF dt
 xlow = 0; xupp = D/2;
 ylow = 0; yupp = 4*max(l);
 alow = abounds(1); aupp = abounds(2);
@@ -289,11 +289,11 @@ P1vec = [P(:,1),zs];
 P2vec = [P(:,2),zs];
 Dvec = [D*os,zs];
 [L,Fvec,Ldot] = deal(zeros(ntime,3,5));
-L(:,1:2,1) = xyH - P1vec; % LLH
-L(:,1:2,2) = xyF - P2vec; % LFT
-L(:,1:2,3) = xyF - (P2vec + Dvec); % LFL
-L(:,1:2,4) = xyH - (P1vec - Dvec/2);
-L(:,1:2,5) = xyF - (P2vec + Dvec/2);
+L(:,1:2,1) = xyH - P1vec; % LHL - Left Hind Leading
+L(:,1:2,2) = xyF - P2vec; % LFT - Left Front Leading
+L(:,1:2,3) = xyF - (P2vec + Dvec); % LFL - Left Front Trailing
+L(:,1:2,4) = xyH - (P1vec - Dvec/2); % RHL - Right Hind Leading 
+L(:,1:2,5) = xyF - (P2vec + Dvec/2); % RFL - Right Fore Leading
 
 absL = sqrt(dot(L,L,2));
 
@@ -341,7 +341,6 @@ LimbLength = F.*LengthDiff - slimb;
 AboveGround = [y + rH(:,2),y + rF(:,2)];
 
 Abs2Slack = permute(FV,[1 3 2]) - p + q;
-
 
 phaseout.path = [SimultContact,LimbLength,AboveGround,Abs2Slack]; % path constraints, matrix of size num collocation points X num path constraints
 
