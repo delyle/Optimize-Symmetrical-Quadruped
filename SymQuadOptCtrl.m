@@ -12,6 +12,8 @@ function output = SymQuadOptCtrl(auxdata,guess)
 %   tau -- lb/g/T^2, a (inverse) time constant 
 %   mf -- the bias of the center of mass towards the fore-quarters from the
 %         hindquarters (lb)
+%   c -- a vector of weights for terms in the cost function
+%
 %   auxdata can take on other values that are otherwise set by default: see
 %   below
 %
@@ -60,6 +62,18 @@ if isfield(auxdata,'LimbWork')
     end
 else
     auxdata.LimbWork = true; % calculate limb work for objective. If false, will calculate a limb's contribution to COM work
+end
+
+if ~isfield(auxdata,'meshMaxIter')
+   auxdata.meshMaxIter = 4; 
+end
+
+if ~isfield(auxdata,'snoptIter')
+   auxdata.snoptIter = 1000; 
+end
+
+if ~isfield(auxdata,'snopttolerance')
+   auxdata.snopttolerance = 1e-4; 
 end
 
 if isfield(auxdata,'Fr')
