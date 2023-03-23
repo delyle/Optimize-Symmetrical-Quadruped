@@ -7,7 +7,7 @@ function output = SymQuadOptCtrl(auxdata,guess)
 % auxdata is a struct that contains data required for the problem.
 % Necessary fields are:
 %   D -- the stride length per body length (lb)
-%   l -- [forelimb, hindlimb] lengths relative to lb (vector)
+%   lmax -- [forelimb, hindlimb] lengths relative to lb (vector)
 %   I -- Normalized pitch MOI (Murphy number x 0.25, or I/m/lb^2)
 %   tau -- lb/g/T^2, a (inverse) time constant 
 %   mf -- the bias of the center of mass towards the fore-quarters from the
